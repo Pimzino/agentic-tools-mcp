@@ -33,28 +33,37 @@ export function getGlobalStorageDirectory(): string {
 
 /**
  * Resolve the actual working directory based on configuration
- * 
- * @param providedPath - The working directory path provided by the user
+ *
+ * @param providedPath - The working directory path provided by the user (optional when using global directory)
  * @param config - Storage configuration including global directory flag
  * @returns The actual working directory to use for storage
  */
-export function resolveWorkingDirectory(providedPath: string, config: StorageConfig): string {
+export function resolveWorkingDirectory(providedPath: string | undefined, config: StorageConfig): string {
   if (config.useGlobalDirectory) {
     return getGlobalStorageDirectory();
   }
-  
+
+  if (!providedPath) {
+    throw new Error('workingDirectory is required when not using --claude flag');
+  }
+
   return providedPath;
 }
 
 /**
- * Get updated parameter description for workingDirectory that includes --claude flag behavior
+ * Get parameter description for workingDirectory based on configuration
  */
 export function getWorkingDirectoryDescription(config: StorageConfig): string {
-  const baseDescription = 'The full absolute path to the working directory where data is stored. MUST be an absolute path, never relative. Windows: "C:\\Users\\username\\project" or "D:\\projects\\my-app". Unix/Linux/macOS: "/home/username/project" or "/Users/username/project". Do NOT use: ".", "..", "~", "./folder", "../folder" or any relative paths. Ensure the path exists and is accessible before calling this tool.';
-  
   if (config.useGlobalDirectory) {
-    return baseDescription + ' NOTE: Server started with --claude flag, so this parameter is ignored and a global user directory is used instead.';
+    return 'This parameter is ignored when using --claude flag. Global directory is used automatically.';
   }
-  
-  return baseDescription + ' NOTE: When server is started with --claude flag, this parameter is ignored and a global user directory is used instead.';
+
+  return 'The full absolute path to the working directory where data is stored. MUST be an absolute path, never relative. Windows: "C:\\Users\\username\\project" or "D:\\projects\\my-app". Unix/Linux/macOS: "/home/username/project" or "/Users/username/project". Do NOT use: ".", "..", "~", "./folder", "../folder" or any relative paths. Ensure the path exists and is accessible before calling this tool.';
+}
+
+/**
+ * Check if workingDirectory parameter should be optional based on configuration
+ */
+export function isWorkingDirectoryOptional(config: StorageConfig): boolean {
+  return config.useGlobalDirectory;
 }

@@ -2,7 +2,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { FileStorage } from './features/task-management/storage/file-storage.js';
 import { FileStorage as MemoryFileStorage } from './features/agent-memories/storage/file-storage.js';
 import { getVersion } from './utils/version.js';
-import { StorageConfig, resolveWorkingDirectory, getWorkingDirectoryDescription } from './utils/storage-config.js';
+import { StorageConfig, resolveWorkingDirectory, getWorkingDirectoryDescription, isWorkingDirectoryOptional } from './utils/storage-config.js';
 import { z } from 'zod';
 
 // Project tools
@@ -37,7 +37,7 @@ import { createDeleteMemoryTool } from './features/agent-memories/tools/memories
 /**
  * Create storage instance for a specific working directory
  */
-async function createStorage(workingDirectory: string, config: StorageConfig): Promise<FileStorage> {
+async function createStorage(workingDirectory: string | undefined, config: StorageConfig): Promise<FileStorage> {
   const resolvedDirectory = resolveWorkingDirectory(workingDirectory, config);
   const storage = new FileStorage(resolvedDirectory);
   await storage.initialize();
@@ -47,11 +47,20 @@ async function createStorage(workingDirectory: string, config: StorageConfig): P
 /**
  * Create memory storage instance for a specific working directory
  */
-async function createMemoryStorage(workingDirectory: string, config: StorageConfig): Promise<MemoryFileStorage> {
+async function createMemoryStorage(workingDirectory: string | undefined, config: StorageConfig): Promise<MemoryFileStorage> {
   const resolvedDirectory = resolveWorkingDirectory(workingDirectory, config);
   const storage = new MemoryFileStorage(resolvedDirectory);
   await storage.initialize();
   return storage;
+}
+
+/**
+ * Helper function to create workingDirectory schema based on configuration
+ */
+function createWorkingDirectorySchema(config: StorageConfig) {
+  return isWorkingDirectoryOptional(config)
+    ? z.string().optional().describe(getWorkingDirectoryDescription(config))
+    : z.string().describe(getWorkingDirectoryDescription(config));
 }
 
 /**
@@ -69,9 +78,9 @@ export async function createServer(config: StorageConfig = { useGlobalDirectory:
     'list_projects',
     'Discover and overview all your projects with comprehensive details and progress insights. Perfect for getting a bird\'s-eye view of your work portfolio, tracking project status, and quickly navigating between different initiatives in your workspace with project-specific storage.',
     {
-      workingDirectory: z.string().describe(getWorkingDirectoryDescription(config))
+      workingDirectory: createWorkingDirectorySchema(config)
     },
-    async ({ workingDirectory }: { workingDirectory: string }) => {
+    async ({ workingDirectory }: { workingDirectory?: string }) => {
       try {
         const storage = await createStorage(workingDirectory, config);
         const tool = createListProjectsTool(storage);
@@ -92,11 +101,11 @@ export async function createServer(config: StorageConfig = { useGlobalDirectory:
     'create_project',
     'Launch new projects with structured organization and detailed documentation. Establishes a solid foundation for task management with Git-trackable project data, enabling seamless collaboration and progress tracking across your development workflow.',
     {
-      workingDirectory: z.string().describe(getWorkingDirectoryDescription(config)),
+      workingDirectory: createWorkingDirectorySchema(config),
       name: z.string().describe('The name of the new project'),
       description: z.string().describe('A detailed description of the project')
     },
-    async ({ workingDirectory, name, description }: { workingDirectory: string; name: string; description: string }) => {
+    async ({ workingDirectory, name, description }: { workingDirectory?: string; name: string; description: string }) => {
       try {
         const storage = await createStorage(workingDirectory, config);
         const tool = createCreateProjectTool(storage);
@@ -117,10 +126,10 @@ export async function createServer(config: StorageConfig = { useGlobalDirectory:
     'get_project',
     'Access comprehensive project details including metadata, creation dates, and current status. Essential for project analysis, reporting, and understanding project context when planning tasks or reviewing progress in your development workflow.',
     {
-      workingDirectory: z.string().describe(getWorkingDirectoryDescription(config)),
+      workingDirectory: createWorkingDirectorySchema(config),
       id: z.string().describe('The unique identifier of the project to retrieve')
     },
-    async ({ workingDirectory, id }: { workingDirectory: string; id: string }) => {
+    async ({ workingDirectory, id }: { workingDirectory?: string; id: string }) => {
       try {
         const storage = await createStorage(workingDirectory, config);
         const tool = createGetProjectTool(storage);
@@ -141,12 +150,12 @@ export async function createServer(config: StorageConfig = { useGlobalDirectory:
     'update_project',
     'Evolve and refine your project information as requirements change and scope develops. Maintain accurate project documentation with flexible updates to names and descriptions, ensuring your project data stays current and meaningful throughout the development lifecycle.',
     {
-      workingDirectory: z.string().describe(getWorkingDirectoryDescription(config)),
+      workingDirectory: createWorkingDirectorySchema(config),
       id: z.string().describe('The unique identifier of the project to update'),
       name: z.string().optional().describe('New name for the project (optional)'),
       description: z.string().optional().describe('New description for the project (optional)')
     },
-    async ({ workingDirectory, id, name, description }: { workingDirectory: string; id: string; name?: string; description?: string }) => {
+    async ({ workingDirectory, id, name, description }: { workingDirectory?: string; id: string; name?: string; description?: string }) => {
       try {
         const storage = await createStorage(workingDirectory, config);
         const tool = createUpdateProjectTool(storage);
@@ -167,11 +176,11 @@ export async function createServer(config: StorageConfig = { useGlobalDirectory:
     'delete_project',
     'Safely remove completed or obsolete projects from your workspace with built-in confirmation safeguards. Permanently cleans up project data while protecting against accidental deletions, helping maintain an organized and current project portfolio.',
     {
-      workingDirectory: z.string().describe(getWorkingDirectoryDescription(config)),
+      workingDirectory: createWorkingDirectorySchema(config),
       id: z.string().describe('The unique identifier of the project to delete'),
       confirm: z.boolean().describe('Must be set to true to confirm deletion (safety measure)')
     },
-    async ({ workingDirectory, id, confirm }: { workingDirectory: string; id: string; confirm: boolean }) => {
+    async ({ workingDirectory, id, confirm }: { workingDirectory?: string; id: string; confirm: boolean }) => {
       try {
         const storage = await createStorage(workingDirectory, config);
         const tool = createDeleteProjectTool(storage);
@@ -193,10 +202,10 @@ export async function createServer(config: StorageConfig = { useGlobalDirectory:
     'list_tasks',
     'Explore and organize your task portfolio with intelligent filtering and comprehensive progress tracking. View all tasks across projects or focus on specific project tasks, perfect for sprint planning, progress reviews, and maintaining productivity momentum.',
     {
-      workingDirectory: z.string().describe(getWorkingDirectoryDescription(config)),
+      workingDirectory: createWorkingDirectorySchema(config),
       projectId: z.string().optional().describe('Filter tasks to only those belonging to this project (optional)')
     },
-    async ({ workingDirectory, projectId }: { workingDirectory: string; projectId?: string }) => {
+    async ({ workingDirectory, projectId }: { workingDirectory?: string; projectId?: string }) => {
       try {
         const storage = await createStorage(workingDirectory, config);
         const tool = createListTasksTool(storage);
@@ -217,12 +226,12 @@ export async function createServer(config: StorageConfig = { useGlobalDirectory:
     'create_task',
     'Transform project goals into actionable, trackable tasks with detailed specifications and hierarchical organization. Build structured workflows that break down complex projects into manageable components, enabling clear progress tracking and team coordination.',
     {
-      workingDirectory: z.string().describe(getWorkingDirectoryDescription(config)),
+      workingDirectory: createWorkingDirectorySchema(config),
       name: z.string().describe('The name/title of the new task'),
       details: z.string().describe('Detailed description of what the task involves'),
       projectId: z.string().describe('The ID of the project this task belongs to')
     },
-    async ({ workingDirectory, name, details, projectId }: { workingDirectory: string; name: string; details: string; projectId: string }) => {
+    async ({ workingDirectory, name, details, projectId }: { workingDirectory?: string; name: string; details: string; projectId: string }) => {
       try {
         const storage = await createStorage(workingDirectory, config);
         const tool = createCreateTaskTool(storage);
@@ -243,10 +252,10 @@ export async function createServer(config: StorageConfig = { useGlobalDirectory:
     'get_task',
     'Deep-dive into task specifics with comprehensive details including progress status, creation history, and full context. Essential for task analysis, status reporting, and understanding dependencies when planning work or conducting progress reviews.',
     {
-      workingDirectory: z.string().describe(getWorkingDirectoryDescription(config)),
+      workingDirectory: createWorkingDirectorySchema(config),
       id: z.string().describe('The unique identifier of the task to retrieve')
     },
-    async ({ workingDirectory, id }: { workingDirectory: string; id: string }) => {
+    async ({ workingDirectory, id }: { workingDirectory?: string; id: string }) => {
       try {
         const storage = await createStorage(workingDirectory, config);
         const tool = createGetTaskTool(storage);
@@ -267,13 +276,13 @@ export async function createServer(config: StorageConfig = { useGlobalDirectory:
     'update_task',
     'Adapt and refine tasks as work progresses with flexible updates to specifications, descriptions, and completion status. Keep your workflow current and accurate, enabling dynamic project management that responds to changing requirements and discoveries.',
     {
-      workingDirectory: z.string().describe(getWorkingDirectoryDescription(config)),
+      workingDirectory: createWorkingDirectorySchema(config),
       id: z.string().describe('The unique identifier of the task to update'),
       name: z.string().optional().describe('New name/title for the task (optional)'),
       details: z.string().optional().describe('New detailed description for the task (optional)'),
       completed: z.boolean().optional().describe('Mark task as completed (true) or incomplete (false) (optional)')
     },
-    async ({ workingDirectory, id, name, details, completed }: { workingDirectory: string; id: string; name?: string; details?: string; completed?: boolean }) => {
+    async ({ workingDirectory, id, name, details, completed }: { workingDirectory?: string; id: string; name?: string; details?: string; completed?: boolean }) => {
       try {
         const storage = await createStorage(workingDirectory, config);
         const tool = createUpdateTaskTool(storage);
@@ -294,11 +303,11 @@ export async function createServer(config: StorageConfig = { useGlobalDirectory:
     'delete_task',
     'Streamline your workflow by safely removing obsolete or completed tasks with built-in confirmation protection. Maintain a clean, focused task environment while preventing accidental data loss through required confirmation safeguards.',
     {
-      workingDirectory: z.string().describe(getWorkingDirectoryDescription(config)),
+      workingDirectory: createWorkingDirectorySchema(config),
       id: z.string().describe('The unique identifier of the task to delete'),
       confirm: z.boolean().describe('Must be set to true to confirm deletion (safety measure)')
     },
-    async ({ workingDirectory, id, confirm }: { workingDirectory: string; id: string; confirm: boolean }) => {
+    async ({ workingDirectory, id, confirm }: { workingDirectory?: string; id: string; confirm: boolean }) => {
       try {
         const storage = await createStorage(workingDirectory, config);
         const tool = createDeleteTaskTool(storage);
@@ -320,11 +329,11 @@ export async function createServer(config: StorageConfig = { useGlobalDirectory:
     'list_subtasks',
     'Navigate your detailed work breakdown with granular subtask visibility and flexible filtering options. Perfect for sprint planning, daily standups, and detailed progress tracking across the complete project hierarchy from high-level goals to specific implementation steps.',
     {
-      workingDirectory: z.string().describe(getWorkingDirectoryDescription(config)),
+      workingDirectory: createWorkingDirectorySchema(config),
       taskId: z.string().optional().describe('Filter subtasks to only those belonging to this task (optional)'),
       projectId: z.string().optional().describe('Filter subtasks to only those in this project (optional)')
     },
-    async ({ workingDirectory, taskId, projectId }: { workingDirectory: string; taskId?: string; projectId?: string }) => {
+    async ({ workingDirectory, taskId, projectId }: { workingDirectory?: string; taskId?: string; projectId?: string }) => {
       try {
         const storage = await createStorage(workingDirectory, config);
         const tool = createListSubtasksTool(storage);
@@ -345,12 +354,12 @@ export async function createServer(config: StorageConfig = { useGlobalDirectory:
     'create_subtask',
     'Break down complex tasks into precise, actionable subtasks with detailed specifications and clear ownership. Enable granular progress tracking and team coordination by decomposing work into manageable, measurable components within your hierarchical project structure.',
     {
-      workingDirectory: z.string().describe(getWorkingDirectoryDescription(config)),
+      workingDirectory: createWorkingDirectorySchema(config),
       name: z.string().describe('The name/title of the new subtask'),
       details: z.string().describe('Detailed description of what the subtask involves'),
       taskId: z.string().describe('The ID of the parent task this subtask belongs to')
     },
-    async ({ workingDirectory, name, details, taskId }: { workingDirectory: string; name: string; details: string; taskId: string }) => {
+    async ({ workingDirectory, name, details, taskId }: { workingDirectory?: string; name: string; details: string; taskId: string }) => {
       try {
         const storage = await createStorage(workingDirectory, config);
         const tool = createCreateSubtaskTool(storage);
@@ -371,10 +380,10 @@ export async function createServer(config: StorageConfig = { useGlobalDirectory:
     'get_subtask',
     'Examine subtask details with comprehensive context including parent task relationships, progress status, and implementation specifics. Essential for detailed work planning, progress assessment, and understanding the complete scope of granular work items.',
     {
-      workingDirectory: z.string().describe(getWorkingDirectoryDescription(config)),
+      workingDirectory: createWorkingDirectorySchema(config),
       id: z.string().describe('The unique identifier of the subtask to retrieve')
     },
-    async ({ workingDirectory, id }: { workingDirectory: string; id: string }) => {
+    async ({ workingDirectory, id }: { workingDirectory?: string; id: string }) => {
       try {
         const storage = await createStorage(workingDirectory, config);
         const tool = createGetSubtaskTool(storage);
@@ -395,13 +404,13 @@ export async function createServer(config: StorageConfig = { useGlobalDirectory:
     'update_subtask',
     'Fine-tune subtask specifications and track completion progress with flexible updates to names, descriptions, and status. Maintain accurate, up-to-date work records that reflect evolving requirements and real-time progress in your detailed project execution.',
     {
-      workingDirectory: z.string().describe(getWorkingDirectoryDescription(config)),
+      workingDirectory: createWorkingDirectorySchema(config),
       id: z.string().describe('The unique identifier of the subtask to update'),
       name: z.string().optional().describe('New name/title for the subtask (optional)'),
       details: z.string().optional().describe('New detailed description for the subtask (optional)'),
       completed: z.boolean().optional().describe('Mark subtask as completed (true) or incomplete (false) (optional)')
     },
-    async ({ workingDirectory, id, name, details, completed }: { workingDirectory: string; id: string; name?: string; details?: string; completed?: boolean }) => {
+    async ({ workingDirectory, id, name, details, completed }: { workingDirectory?: string; id: string; name?: string; details?: string; completed?: boolean }) => {
       try {
         const storage = await createStorage(workingDirectory, config);
         const tool = createUpdateSubtaskTool(storage);
@@ -422,11 +431,11 @@ export async function createServer(config: StorageConfig = { useGlobalDirectory:
     'delete_subtask',
     'Clean up your detailed work breakdown by safely removing completed or obsolete subtasks with confirmation safeguards. Maintain focus on current priorities while preserving data integrity through required confirmation protocols.',
     {
-      workingDirectory: z.string().describe(getWorkingDirectoryDescription(config)),
+      workingDirectory: createWorkingDirectorySchema(config),
       id: z.string().describe('The unique identifier of the subtask to delete'),
       confirm: z.boolean().describe('Must be set to true to confirm deletion (safety measure)')
     },
-    async ({ workingDirectory, id, confirm }: { workingDirectory: string; id: string; confirm: boolean }) => {
+    async ({ workingDirectory, id, confirm }: { workingDirectory?: string; id: string; confirm: boolean }) => {
       try {
         const storage = await createStorage(workingDirectory, config);
         const tool = createDeleteSubtaskTool(storage);
@@ -448,14 +457,14 @@ export async function createServer(config: StorageConfig = { useGlobalDirectory:
     'create_memory',
     'Capture and preserve important information, insights, or context as searchable memories with intelligent file-based storage. Ideal for building a knowledge base of user preferences, technical decisions, project context, or any information you want to remember and retrieve later with organized categorization.',
     {
-      workingDirectory: z.string().describe(getWorkingDirectoryDescription(config)),
+      workingDirectory: createWorkingDirectorySchema(config),
       title: z.string().describe('Short title for the memory (max 50 characters for better file organization)'),
       content: z.string().describe('Detailed memory content/text (no character limit)'),
       metadata: z.record(z.any()).optional().describe('Optional metadata as key-value pairs for additional context'),
       category: z.string().optional().describe('Optional category to organize memories (e.g., "user_preferences", "project_context")')
     },
     async ({ workingDirectory, title, content, metadata, category }: {
-      workingDirectory: string;
+      workingDirectory?: string;
       title: string;
       content: string;
       metadata?: Record<string, any>;
@@ -481,14 +490,14 @@ export async function createServer(config: StorageConfig = { useGlobalDirectory:
     'search_memories',
     'Intelligently search through your stored memories using advanced text matching algorithms to quickly find relevant information. Features multi-field search across titles, content, and metadata with customizable relevance scoring - perfect for retrieving past decisions, preferences, or contextual information when you need it most.',
     {
-      workingDirectory: z.string().describe(getWorkingDirectoryDescription(config)),
+      workingDirectory: createWorkingDirectorySchema(config),
       query: z.string().describe('The search query text to find matching memories'),
       limit: z.number().min(1).max(100).optional().describe('Maximum number of results to return (default: 10)'),
       threshold: z.number().min(0).max(1).optional().describe('Minimum relevance threshold 0-1 (default: 0.3)'),
       category: z.string().optional().describe('Filter results to memories in this specific category')
     },
     async ({ workingDirectory, query, limit, threshold, category }: {
-      workingDirectory: string;
+      workingDirectory?: string;
       query: string;
       limit?: number;
       threshold?: number;
@@ -514,10 +523,10 @@ export async function createServer(config: StorageConfig = { useGlobalDirectory:
     'get_memory',
     'Access comprehensive memory details including full content, metadata, creation history, and categorization. Essential for reviewing stored knowledge, understanding context, and retrieving complete information when making decisions or referencing past insights.',
     {
-      workingDirectory: z.string().describe(getWorkingDirectoryDescription(config)),
+      workingDirectory: createWorkingDirectorySchema(config),
       id: z.string().describe('The unique identifier of the memory to retrieve')
     },
-    async ({ workingDirectory, id }: { workingDirectory: string; id: string }) => {
+    async ({ workingDirectory, id }: { workingDirectory?: string; id: string }) => {
       try {
         const storage = await createMemoryStorage(workingDirectory, config);
         const tool = createGetMemoryTool(storage);
@@ -538,12 +547,12 @@ export async function createServer(config: StorageConfig = { useGlobalDirectory:
     'list_memories',
     'Browse and explore your knowledge repository with organized memory listings and flexible category filtering. Perfect for reviewing stored information, discovering patterns in your knowledge base, and maintaining awareness of your accumulated insights and decisions.',
     {
-      workingDirectory: z.string().describe(getWorkingDirectoryDescription(config)),
+      workingDirectory: createWorkingDirectorySchema(config),
       category: z.string().optional().describe('Filter to memories in this specific category'),
       limit: z.number().min(1).max(1000).optional().describe('Maximum number of memories to return (default: 50)')
     },
     async ({ workingDirectory, category, limit }: {
-      workingDirectory: string;
+      workingDirectory?: string;
       category?: string;
       limit?: number;
     }) => {
@@ -567,7 +576,7 @@ export async function createServer(config: StorageConfig = { useGlobalDirectory:
     'update_memory',
     'Evolve and refine your stored knowledge with flexible updates to content, categorization, and metadata. Keep your memory repository current and accurate as understanding deepens, ensuring your knowledge base remains a reliable source of up-to-date insights and decisions.',
     {
-      workingDirectory: z.string().describe(getWorkingDirectoryDescription(config)),
+      workingDirectory: createWorkingDirectorySchema(config),
       id: z.string().describe('The unique identifier of the memory to update'),
       title: z.string().optional().describe('New title for the memory (max 50 characters for better file organization)'),
       content: z.string().optional().describe('New detailed content for the memory (no character limit)'),
@@ -575,7 +584,7 @@ export async function createServer(config: StorageConfig = { useGlobalDirectory:
       category: z.string().optional().describe('New category for organizing the memory')
     },
     async ({ workingDirectory, id, title, content, metadata, category }: {
-      workingDirectory: string;
+      workingDirectory?: string;
       id: string;
       title?: string;
       content?: string;
@@ -602,11 +611,11 @@ export async function createServer(config: StorageConfig = { useGlobalDirectory:
     'delete_memory',
     'Safely remove outdated or irrelevant memories from your knowledge repository with built-in confirmation safeguards. Maintain a clean, focused memory collection while protecting against accidental loss of valuable information through required confirmation protocols.',
     {
-      workingDirectory: z.string().describe(getWorkingDirectoryDescription(config)),
+      workingDirectory: createWorkingDirectorySchema(config),
       id: z.string().describe('The unique identifier of the memory to delete'),
       confirm: z.boolean().describe('Must be set to true to confirm deletion (safety measure)')
     },
-    async ({ workingDirectory, id, confirm }: { workingDirectory: string; id: string; confirm: boolean }) => {
+    async ({ workingDirectory, id, confirm }: { workingDirectory?: string; id: string; confirm: boolean }) => {
       try {
         const storage = await createMemoryStorage(workingDirectory, config);
         const tool = createDeleteMemoryTool(storage);
