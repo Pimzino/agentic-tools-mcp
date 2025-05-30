@@ -1,6 +1,6 @@
 {
   "name": "@pimzino/agentic-tools-mcp",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "description": "A comprehensive MCP server for task management and agent memories with JSON file storage",
   "main": "dist/index.js",
   "type": "module",

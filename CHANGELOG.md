@@ -5,6 +5,54 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.1] - 2025-01-27
+
+### 🔧 Fixed --claude Flag Implementation
+
+This release fixes the --claude flag implementation to eliminate confusion and provide crystal-clear behavior when using global directory mode.
+
+### Fixed
+
+#### 🎯 Parameter Handling for --claude Flag
+- **Fixed**: workingDirectory parameter is now properly optional when --claude flag is used
+- **Fixed**: Parameter descriptions are now context-aware and clear about when parameters are ignored
+- **Fixed**: Eliminated confusion where agents would default to C:\ drive instead of proper global directory
+- **Removed**: Problematic get-config tool approach that caused parameter confusion
+
+#### 🌐 Global Directory Override Behavior
+- **Enhanced**: --claude flag now completely ignores workingDirectory parameters as intended
+- **Improved**: Clear parameter descriptions that change based on storage mode
+- **Added**: Proper validation to ensure workingDirectory is provided when not using --claude flag
+- **Simplified**: Clean implementation without dynamic parameter overrides
+
+### Changed
+
+#### 🏗️ Server Architecture Improvements
+- **Updated**: All 19 MCP tools now use conditional parameter schemas based on --claude flag
+- **Added**: `createWorkingDirectorySchema()` helper function for cleaner code
+- **Enhanced**: `resolveWorkingDirectory()` function now handles optional workingDirectory parameter
+- **Improved**: Parameter descriptions are now context-aware and user-friendly
+
+#### 📝 Parameter Description Enhancements
+- **Global Mode**: "This parameter is ignored when using --claude flag. Global directory is used automatically."
+- **Project Mode**: Full path requirements with OS-specific examples and validation guidance
+- **Clear Behavior**: No more confusion about which directory is actually being used
+
+### Technical Details
+
+#### 🔧 Implementation Changes
+- **Optional Parameters**: workingDirectory is optional when `config.useGlobalDirectory` is true
+- **Type Safety**: Updated all function signatures to accept `workingDirectory?: string`
+- **Validation**: Added proper error handling when workingDirectory is missing in project mode
+- **Clean Logic**: Simplified storage resolution without dynamic overrides
+
+#### 🎯 Usage Clarity
+- **Project-specific mode**: `npx @pimzino/agentic-tools-mcp` (workingDirectory required)
+- **Global directory mode**: `npx @pimzino/agentic-tools-mcp --claude` (workingDirectory optional)
+- **No Confusion**: Clear behavior with no parameter conflicts or unexpected defaults
+
+---
+
 ## [1.6.0] - 2025-01-27
 
 ### 🌐 Global Directory Mode with --claude Flag
