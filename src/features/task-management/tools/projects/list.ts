@@ -20,7 +20,8 @@ export function createListProjectsTool(storage: Storage) {
             content: [{
               type: 'text' as const,
               text: 'No projects found. Create your first project to get started!'
-            }]
+            }],
+            recommendedNextStep: 'create_project'
           };
         }
 
@@ -35,7 +36,8 @@ Updated: ${new Date(project.updatedAt).toLocaleString()}`;
           content: [{
             type: 'text' as const,
             text: `Found ${projects.length} project(s):\n\n${projectList}`
-          }]
+          }],
+          recommendedNextStep: 'create_project'
         };
       } catch (error) {
         return {

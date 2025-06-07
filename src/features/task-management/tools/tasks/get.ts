@@ -65,7 +65,8 @@ export function createGetTaskTool(storage: Storage) {
 **Last Updated:** ${new Date(task.updatedAt).toLocaleString()}${subtaskSummary}
 
 Use list_subtasks with taskId="${task.id}" to see all subtasks for this task.`
-          }]
+          }],
+          recommendedNextStep: 'list_subtasks'
         };
       } catch (error) {
         return {

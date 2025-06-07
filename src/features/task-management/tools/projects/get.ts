@@ -64,7 +64,8 @@ export function createGetProjectTool(storage: Storage) {
 Tasks: ${completedTasks}/${tasks.length} completed${subtaskSummary}
 
 Use list_tasks with projectId="${project.id}" to see all tasks in this project.`
-          }]
+          }],
+          recommendedNextStep: 'list_tasks'
         };
       } catch (error) {
         return {

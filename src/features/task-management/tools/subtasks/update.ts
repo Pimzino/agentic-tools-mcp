@@ -163,7 +163,8 @@ Details: ${updatedSubtask.details}
 Last Updated: ${new Date(updatedSubtask.updatedAt).toLocaleString()}
 
 Updated fields: ${changedFields.join(', ')}`
-          }]
+          }],
+          recommendedNextStep: 'list_subtasks'
         };
       } catch (error) {
         return {

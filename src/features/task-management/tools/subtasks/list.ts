@@ -61,7 +61,8 @@ export function createListSubtasksTool(storage: Storage) {
             content: [{
               type: 'text' as const,
               text: message
-            }]
+            }],
+            recommendedNextStep: 'create_subtask'
           };
         }
 
@@ -120,7 +121,8 @@ Updated: ${new Date(subtask.updatedAt).toLocaleString()}`;
           content: [{
             type: 'text' as const,
             text: `${headerText}\n\n${subtaskList}`
-          }]
+          }],
+          recommendedNextStep: 'update_subtask'
         };
       } catch (error) {
         return {

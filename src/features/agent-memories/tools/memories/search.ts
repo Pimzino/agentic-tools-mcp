@@ -121,7 +121,8 @@ Try adjusting your search query or using different keywords.`
             ].filter(Boolean).join(', ') || 'None'}
 
 ${resultText}`
-          }]
+          }],
+          recommendedNextStep: 'get_memory'
         };
       } catch (error) {
         return {

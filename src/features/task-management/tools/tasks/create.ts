@@ -168,7 +168,8 @@ Created: ${new Date(createdTask.createdAt).toLocaleString()}
 • Use \`get_next_task_recommendation\` to see if this task is ready to work on
 • Add subtasks using \`create_subtask\` for complex tasks
 • Update progress using \`update_task\` as you work`
-          }]
+          }],
+          recommendedNextStep: 'get_next_task_recommendation'
         };
       } catch (error) {
         return {

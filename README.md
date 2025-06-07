@@ -58,7 +58,7 @@ This MCP server is part of a complete task and memory management ecosystem:
 - `delete_task` - Delete task and all associated subtasks
 
 #### Advanced Task Management (AI Agent Tools)
-- `parse_prd` - Parse Product Requirements Documents and automatically generate structured tasks
+- `parse_prd` - Parse Product Requirements Documents and automatically generate structured tasks. Returns `processed: true` if tasks already exist for the project.
 - `get_next_task_recommendation` - Get intelligent task recommendations based on dependencies, priorities, and complexity
 - `analyze_task_complexity` - Analyze task complexity and suggest breaking down overly complex tasks
 - `infer_task_progress` - Analyze codebase to infer task completion status from implementation evidence

@@ -145,7 +145,8 @@ Description: ${updatedProject.description}
 Last Updated: ${new Date(updatedProject.updatedAt).toLocaleString()}
 
 Updated fields: ${changedFields.join(', ')}`
-          }]
+          }],
+          recommendedNextStep: 'list_tasks'
         };
       } catch (error) {
         return {

@@ -8,7 +8,7 @@ import { Storage } from '../../storage/storage.js';
  */
 export function createNextTaskRecommendationTool(storage: Storage, getWorkingDirectoryDescription: (config: any) => string, config: any) {
   return {
-    name: 'get_next_task_recommendation_Agentic_Tools',
+    name: 'get_next_task_recommendation',
     description: 'Get intelligent recommendations for the next task to work on based on dependencies, priorities, complexity, and current project status. Smart task recommendation engine for optimal workflow management.',
     inputSchema: z.object({
       workingDirectory: z.string().describe(getWorkingDirectoryDescription(config)),
@@ -83,7 +83,8 @@ ${generateTaskStatusSummary(allTasks)}
           content: [{
             type: 'text' as const,
             text: report
-          }]
+          }],
+          recommendedNextStep: 'research_task'
         };
 
       } catch (error) {

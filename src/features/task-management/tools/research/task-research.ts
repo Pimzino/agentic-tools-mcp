@@ -14,7 +14,7 @@ export function createTaskResearchTool(
   config: any
 ) {
   return {
-    name: 'research_task_Agentic_Tools',
+    name: 'research_task',
     description: 'Guide the AI agent to perform comprehensive web research for a task, with intelligent research suggestions and automatic memory storage of findings. Combines web research capabilities with local knowledge caching.',
     inputSchema: z.object({
       workingDirectory: z.string().describe(getWorkingDirectoryDescription(config)),
@@ -95,7 +95,8 @@ ${memoryInstructions}
 2. Adjust complexity/priority if research reveals new information
 3. Consider breaking down the task if research shows it's more complex than expected
 4. Use \`get_next_task_recommendation\` to see if this task is now ready to start`
-          }]
+          }],
+          recommendedNextStep: 'update_task'
         };
 
       } catch (error) {

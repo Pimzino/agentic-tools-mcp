@@ -75,7 +75,8 @@ export function createDeleteProjectTool(storage: Storage) {
 **Also deleted:** ${tasks.length} task(s) and ${subtasks.length} subtask(s)
 
 This action cannot be undone. All data associated with this project has been permanently removed.`
-          }]
+          }],
+          recommendedNextStep: 'list_projects'
         };
       } catch (error) {
         return {

@@ -95,7 +95,8 @@ Description: ${createdProject.description}
 Created: ${new Date(createdProject.createdAt).toLocaleString()}
 
 You can now add tasks to this project using the create_task tool.`
-          }]
+          }],
+          recommendedNextStep: 'create_task'
         };
       } catch (error) {
         return {

@@ -61,7 +61,8 @@ export function createListMemoriesTool(storage: MemoryStorage) {
               ].filter(Boolean).join(', ') || 'None'}
 
 Create some memories using the create_memory tool to get started!`
-            }]
+            }],
+            recommendedNextStep: 'create_memory'
           };
         }
 
@@ -101,7 +102,8 @@ ${memoryList}
 • Newest memory: ${stats.newestMemory ? new Date(stats.newestMemory).toLocaleString() : 'None'}
 
 Use get_memory with a specific ID to see full details, or search_memories for text-based search.`
-          }]
+          }],
+          recommendedNextStep: 'get_memory'
         };
       } catch (error) {
         return {

@@ -79,7 +79,8 @@ export function createDeleteSubtaskTool(storage: Storage) {
 **Project:** ${projectName}
 
 This action cannot be undone. The subtask has been permanently removed.`
-          }]
+          }],
+          recommendedNextStep: 'list_subtasks'
         };
       } catch (error) {
         return {

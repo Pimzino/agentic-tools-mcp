@@ -61,7 +61,8 @@ export function createGetSubtaskTool(storage: Storage) {
 **Last Updated:** ${new Date(subtask.updatedAt).toLocaleString()}
 
 Use update_subtask to modify this subtask or mark it as completed.`
-          }]
+          }],
+          recommendedNextStep: 'update_subtask'
         };
       } catch (error) {
         return {

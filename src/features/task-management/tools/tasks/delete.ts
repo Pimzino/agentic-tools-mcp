@@ -79,7 +79,8 @@ export function createDeleteTaskTool(storage: Storage) {
 **Also deleted:** ${subtasks.length} subtask(s)
 
 This action cannot be undone. All data associated with this task has been permanently removed.`
-          }]
+          }],
+          recommendedNextStep: 'list_tasks'
         };
       } catch (error) {
         return {

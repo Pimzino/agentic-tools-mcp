@@ -128,7 +128,8 @@ Status: Pending
 Created: ${new Date(createdSubtask.createdAt).toLocaleString()}
 
 You can mark this subtask as completed using update_subtask.`
-          }]
+          }],
+          recommendedNextStep: 'update_subtask'
         };
       } catch (error) {
         return {

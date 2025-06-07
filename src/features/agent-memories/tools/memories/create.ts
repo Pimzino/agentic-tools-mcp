@@ -105,7 +105,8 @@ Use the content field for detailed information.`
 **Metadata:** ${Object.keys(createdMemory.metadata).length > 0 ? JSON.stringify(createdMemory.metadata, null, 2) : 'None'}
 
 The memory has been stored and is ready for text-based search.`
-          }]
+          }],
+          recommendedNextStep: 'search_memories'
         };
       } catch (error) {
         return {

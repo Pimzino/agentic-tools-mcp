@@ -10,7 +10,7 @@ import { Storage } from '../../storage/storage.js';
  */
 export function createParsePRDTool(storage: Storage, getWorkingDirectoryDescription: (config: any) => string, config: any) {
   return {
-    name: 'parse_prd_Agentic_Tools',
+    name: 'parse_prd',
     description: 'Parse a Product Requirements Document (PRD) and automatically generate structured tasks with dependencies, priorities, and complexity estimates. This tool analyzes PRD content and creates a comprehensive task breakdown with intelligent analysis.',
     inputSchema: z.object({
       workingDirectory: z.string().describe(getWorkingDirectoryDescription(config)),
@@ -33,6 +33,23 @@ export function createParsePRDTool(storage: Storage, getWorkingDirectoryDescript
               text: `Error: Project with ID "${projectId}" not found.`
             }],
             isError: true
+          };
+        }
+
+        // Check if the project already has tasks to determine if the PRD was processed before
+        const existingTasks = await storage.getTasks(projectId);
+        const processed = existingTasks.length > 0;
+
+        if (processed) {
+          return {
+            content: [
+              {
+                type: 'text' as const,
+                text: `ℹ️ Project "${project.name}" already has ${existingTasks.length} tasks. PRD has been processed previously.`
+              }
+            ],
+            processed: true,
+            recommendedNextStep: 'get_next_task_recommendation'
           };
         }
 
@@ -89,7 +106,9 @@ ${createdTasks.map(task =>
 1. Review generated tasks and adjust priorities/dependencies as needed
 2. Use \`get_next_task_recommendation\` to see which tasks are ready to start
 3. Begin implementation with the recommended tasks`
-          }]
+          }],
+          recommendedNextStep: 'get_next_task_recommendation',
+          processed: false
         };
 
       } catch (error) {

@@ -91,7 +91,8 @@ The memory could not be deleted. Please try again.`
 • **Created:** ${new Date(memory.createdAt).toLocaleString()}
 
 The memory has been permanently removed from storage and cannot be recovered.`
-          }]
+          }],
+          recommendedNextStep: 'list_memories'
         };
       } catch (error) {
         return {

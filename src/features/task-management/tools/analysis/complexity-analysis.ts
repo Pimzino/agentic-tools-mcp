@@ -8,7 +8,7 @@ import { Storage } from '../../storage/storage.js';
  */
 export function createComplexityAnalysisTool(storage: Storage, getWorkingDirectoryDescription: (config: any) => string, config: any) {
   return {
-    name: 'analyze_task_complexity_Agentic_Tools',
+    name: 'analyze_task_complexity',
     description: 'Analyze task complexity and suggest breaking down overly complex tasks into smaller, manageable subtasks. Intelligent complexity analysis feature for better productivity and progress tracking.',
     inputSchema: z.object({
       workingDirectory: z.string().describe(getWorkingDirectoryDescription(config)),
@@ -88,7 +88,8 @@ export function createComplexityAnalysisTool(storage: Storage, getWorkingDirecto
           content: [{
             type: 'text' as const,
             text: report
-          }]
+          }],
+          recommendedNextStep: 'create_subtask'
         };
 
       } catch (error) {

@@ -252,7 +252,8 @@ Updated fields: ${changedFields.join(', ')}
 🎯 **Next Steps:**
 • Use \`get_next_task_recommendation\` to see what to work on next
 • Run \`analyze_task_complexity\` if complexity has changed`
-          }]
+          }],
+          recommendedNextStep: 'get_next_task_recommendation'
         };
       } catch (error) {
         return {

@@ -55,7 +55,8 @@ The memory with this ID does not exist or may have been deleted.`
 **Created:** ${new Date(memory.createdAt).toLocaleString()}
 **Updated:** ${new Date(memory.updatedAt).toLocaleString()}
 **Metadata:** ${Object.keys(memory.metadata).length > 0 ? JSON.stringify(memory.metadata, null, 2) : 'None'}`
-          }]
+          }],
+          recommendedNextStep: 'update_memory'
         };
       } catch (error) {
         return {

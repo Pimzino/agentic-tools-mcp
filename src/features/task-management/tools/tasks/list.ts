@@ -41,7 +41,8 @@ export function createListTasksTool(storage: Storage) {
             content: [{
               type: 'text' as const,
               text: message
-            }]
+            }],
+            recommendedNextStep: 'create_task'
           };
         }
 
@@ -87,7 +88,8 @@ Updated: ${new Date(task.updatedAt).toLocaleString()}`;
           content: [{
             type: 'text' as const,
             text: `${headerText}\n\n${taskList}`
-          }]
+          }],
+          recommendedNextStep: 'get_next_task_recommendation'
         };
       } catch (error) {
         return {

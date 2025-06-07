@@ -166,7 +166,8 @@ The memory could not be updated. Please try again.`
 **Created:** ${new Date(updatedMemory.createdAt).toLocaleString()}
 **Updated:** ${new Date(updatedMemory.updatedAt).toLocaleString()}
 **Metadata:** ${Object.keys(updatedMemory.metadata).length > 0 ? JSON.stringify(updatedMemory.metadata, null, 2) : 'None'}`
-          }]
+          }],
+          recommendedNextStep: 'search_memories'
         };
       } catch (error) {
         return {
